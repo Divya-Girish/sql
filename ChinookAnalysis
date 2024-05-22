@@ -1,0 +1,117 @@
+select * from albums;
+select * from artists;
+select * from customers;
+select * from employees;
+select * from genres;
+select *from invoice_items;
+select * from invoices;
+select * from media_types;
+select * from playlist_track;
+select * from playlists;
+select * from tracks;
+#Show Customers (their full names, customer ID, and country) who are not in the US
+
+select CustomerId, FirstName, LastName, Country
+from customers
+where Country <> 'USA'
+;
+
+#Show only the Customers from Brazil.
+
+select CustomerId, FirstName||' '|| LastName as fullname, Country
+from customers
+where Country ='Brazil';
+
+#Find the Invoices of customers who are from Brazil. The resulting table should show the customer's full name, Invoice ID, Date of the invoice, and billing country.
+
+select i.InvoiceId,i.InvoiceDate,i.BillingCountry,c.FirstName, c.LastName
+from customers as c
+join invoices as i
+on c.CustomerId = i.CustomerId
+where Country = 'Brazil';
+
+#Show the Employees who are Sales Agents.
+
+Select * from employees
+where title = "Sales Support Agent" ;
+
+#Find a unique/distinct list of billing countries from the Invoice table.
+
+select distinct(BillingCountry)
+from invoices;
+#Provide a query that shows the invoices associated with each sales agent. The resulting table should include the Sales Agent's full name
+
+select  e.FirstName||' '||e.LastName as fullname, e.title,i.invoiceId, i.invoiceDate,c.CustomerId
+from customers as c
+join invoices as i
+on c.CustomerId = i.InvoiceId 
+join employees as e
+on c.CustomerId = e. EmployeeId
+where title ="Sales Support Agent";
+
+#Show the Invoice Total, Customer name, Country, and Sales Agent name for all invoices and customers.
+
+select c.customerId,e.title,i.total, c.FirstName||" "||c.LastName as CustomerName, c.Country,e.FirstName||' ' ||e.LastName as SalesAgentName, i.InvoiceDate
+From customers as c
+join employees as e
+on c.CustomerId = e.EmployeeId
+join invoices as i
+on c.CustomerId = i.InvoiceId
+where title = 'Sales Support Agent'; 
+
+#How many Invoices were there in 2009?
+
+select count(*) as NumberOfInvoices
+from invoices
+where strftime('%Y',InvoiceDate) ='2009';
+
+#What are the total sales for 2009?
+
+select sum(Total)as TotalSale
+from invoices
+where strftime('%Y',InvoiceDate)='2009';
+
+#Write a query that includes the purchased track name with each invoice line ID
+
+select Il.InvoiceLineId, T.Name
+from Invoice_items as Il
+join Tracks as T 
+on Il.InvoiceId = T.TrackId;
+
+#Write a query that includes the purchased track name AND artist name with each invoice line ID.
+
+select Il.InvoiceLineId, T.Name as TrackName, a.Name as ArtistName
+from Invoice_items as Il
+join Tracks as T 
+on Il.InvoiceId = T.TrackId
+join albums on albums.albumId= T.TrackId
+join artists  as a
+on albums.artistId = a.artistId;
+
+#Provide a query that shows all the Tracks, and include the Album name, Media type, and Genre.
+
+select T.Name as TrackName, Al.Title as AlbumName, M.Name as mediaType, G.Name as GenreName
+from Tracks as T
+join Albums as Al
+on T.AlbumId= Al.AlbumId
+join media_types as M
+on T.MediaTypeId = M.MediaTypeId
+join Genres as G
+on T.GenreId =G.GenreId;
+
+#Show the total sales made by each sales agent.
+
+select e.Title as SalesAgent, sum(Total) as TotalSale
+from employees as e
+join customers as c
+on c.SupportRepId=e.employeeId
+join invoices as i
+on c.customerId = i.invoiceId
+where e.Title= '%Agent%'
+group by e. Title;
+
+#Which sales agent made the most dollars in sales in 2009?
+
+select max(total),
+from invoices as i
+where strftime('%Y',InvoiceDate) ='2009';
